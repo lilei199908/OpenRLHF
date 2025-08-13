@@ -16,9 +16,8 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --use_kl_loss \
    --kl_estimator k3 \
    --advantage_estimator group_norm \
-   --pretrain $ROOT_PATH/Qwen3-4B \
+   --pretrain $ROOT_PATH/Qwen3-30B-A3B \
    --remote_rm_url /data1/lilei/OpenRLHF/examples/python/reward_func_aime2024.py \
-   --save_path $ROOT_PATH/test_scripts/final/Qwen3-4B \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
    --micro_train_batch_size 10 \
@@ -29,7 +28,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --max_epochs 1 \
    --prompt_max_len 1024 \
    --max_samples 100000 \
-   --generate_max_len 1024 \
+   --generate_max_len 4096 \
    --zero_stage 3 \
    --bf16 \
    --actor_learning_rate 5e-7 \
