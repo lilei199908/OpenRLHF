@@ -16,7 +16,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --use_kl_loss \
    --kl_estimator k3 \
    --advantage_estimator group_norm \
-   --pretrain $ROOT_PATH/Qwen3-30B-A3B \
+   --pretrain $ROOT_PATH/Qwen3-4B \
    --remote_rm_url /data1/lilei/OpenRLHF/examples/python/reward_func_aime2024.py \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
