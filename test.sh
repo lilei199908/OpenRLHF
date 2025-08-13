@@ -34,7 +34,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --bf16 \
    --actor_learning_rate 5e-7 \
    --critic_learning_rate 9e-6 \
-   --prompt_data /data1/lilei/aime-2024/aime-2024.jsonl \
+   --prompt_data /data1/lilei/aime_2024/data/train-00000-of-00001.parquet \
    --input_key problem \
    --label_key answer \
    --apply_chat_template \
