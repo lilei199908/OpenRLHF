@@ -23,7 +23,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --save_hf_ckpt \
    --micro_train_batch_size 80 \
    --train_batch_size 80 \
-   --micro_rollout_batch_size 16 \
+   --micro_rollout_batch_size 10 \
    --rollout_batch_size 16 \
    --n_samples_per_prompt 5 \
    --max_epochs 1 \
