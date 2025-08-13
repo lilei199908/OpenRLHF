@@ -1,5 +1,5 @@
 set -x
-ROOT_PATH='/data1/lilei/'
+ROOT_PATH='/data1/lilei'
 python3 -m openrlhf.cli.train_ppo_ray \
    --ref_num_nodes 1 \
    --ref_num_gpus_per_node 8 \
