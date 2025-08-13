@@ -21,7 +21,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --save_path $ROOT_PATH/test_scripts/final/Qwen3-4B \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
-   --micro_train_batch_size 20 \
+   --micro_train_batch_size 10 \
    --train_batch_size 80 \
    --gradient_accumulation_steps 1 \
    --micro_rollout_batch_size 10 \
