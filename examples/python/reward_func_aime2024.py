@@ -66,11 +66,6 @@ def reward_func(
     return {
         "rewards": rewards_tensor,
         "scores": scores_tensor,
-        "extra_logs": {
-            "accuracy": scores_tensor.mean().item(),
-            "predictions": preds,
-            "ground_truths": labels,
-        }
     }
 
 # Copyright 2024 Bytedance Ltd. and/or its affiliates
