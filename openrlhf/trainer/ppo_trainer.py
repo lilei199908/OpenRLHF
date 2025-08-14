@@ -466,10 +466,9 @@ class PPOTrainer(BasePPOTrainer):
             number_of_samples = 0
             for _, rand_prompts, labels in self.prompts_dataloader:
                 remote_reward_model = self.remote_reward_model if self.args.dynamic_filtering else None
-                with timer("rollout and reward"):
-                    rollout_samples = self.samples_generator.generate_samples(
-                        rand_prompts, labels, remote_reward_model=remote_reward_model, **self.generate_kwargs
-                    )
+                rollout_samples = self.samples_generator.generate_samples(
+                    rand_prompts, labels, remote_reward_model=remote_reward_model, **self.generate_kwargs
+                )
                 pbar.update()
 
                 # dynamic filtering
@@ -521,8 +520,7 @@ class PPOTrainer(BasePPOTrainer):
                         self.critic_model_group.async_run_method_batch(method_name="append", experience=experiences)
                     )
                 ray.get(refs)
-                with timer("train and update weights"):
-                    status = self.ppo_train(steps)
+                status = self.ppo_train(steps)
 
                 if "kl" in status:
                     self.kl_ctl.update(status["kl"], args.rollout_batch_size * args.n_samples_per_prompt)

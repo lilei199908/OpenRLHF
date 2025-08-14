@@ -13,7 +13,7 @@ from openrlhf.trainer.ray.launcher import RayActorGroup
 from openrlhf.utils.logging_utils import init_logger
 from openrlhf.utils.seqlen_balancing import get_minimum_num_micro_batch_size, get_seqlen_balanced_partitions
 from openrlhf.utils.utils import remove_pad_token, zero_pad_sequences
-
+from openrlhf.utils.time import timer
 logger = init_logger(__name__)
 
 
@@ -339,11 +339,12 @@ class SamplesGenerator:
             refs.append(llm.add_requests.remote(sampling_params=sampling_params, prompt_token_ids=prompt_token_ids))
         ray.get(refs)
 
-        # Retrieve and combine results from all outputs
-        all_output_refs = []
-        for i, llm in enumerate(llms):
-            all_output_refs.append(llm.get_responses.remote())
-        all_outputs = sum(ray.get(all_output_refs), [])
+        with timer("rollout"):
+            # Retrieve and combine results from all outputs
+            all_output_refs = []
+            for i, llm in enumerate(llms):
+                all_output_refs.append(llm.get_responses.remote())
+            all_outputs = sum(ray.get(all_output_refs), [])
 
         # Process outputs into Experience objects
         samples_list = []
@@ -398,26 +399,27 @@ class SamplesGenerator:
             )
             samples_list.append(rollout_samples)
 
-        # Get rewards from remote reward models if needed
-        # This is required by dynamic sampling
-        remote_reward_model = kwargs.get("remote_reward_model", None)
-        if remote_reward_model:
-            all_queries = sum(
-                [
-                    self.tokenizer.batch_decode(
-                        remove_pad_token(s.sequences, s.attention_mask), skip_special_tokens=False
-                    )
-                    for s in samples_list
-                ],
-                [],
-            )
-            all_prompts = sum([s.prompts for s in samples_list], [])
-            all_labels = sum([s.labels for s in samples_list], [])
+        with timer("reward"):
+            # Get rewards from remote reward models if needed
+            # This is required by dynamic sampling
+            remote_reward_model = kwargs.get("remote_reward_model", None)
+            if remote_reward_model:
+                all_queries = sum(
+                    [
+                        self.tokenizer.batch_decode(
+                            remove_pad_token(s.sequences, s.attention_mask), skip_special_tokens=False
+                        )
+                        for s in samples_list
+                    ],
+                    [],
+                )
+                all_prompts = sum([s.prompts for s in samples_list], [])
+                all_labels = sum([s.labels for s in samples_list], [])
 
-            # Get rewards info from remote model
-            rewards_info = ray.get(remote_reward_model.get_rewards.remote(all_queries, all_prompts, all_labels))
-            # Process rewards and scores
-            update_samples_with_rewards(rewards_info, samples_list)
+                # Get rewards info from remote model
+                rewards_info = ray.get(remote_reward_model.get_rewards.remote(all_queries, all_prompts, all_labels))
+                # Process rewards and scores
+                update_samples_with_rewards(rewards_info, samples_list)
 
         return samples_list
 
