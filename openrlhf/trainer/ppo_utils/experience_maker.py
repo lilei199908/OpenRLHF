@@ -267,7 +267,7 @@ class SamplesGenerator:
                 batch_vllm_engine_call(self.vllm_engines, "wake_up")
 
         rollout_samples = self._generate_vllm(all_prompts, all_labels, **generate_kwargs)
-        
+
         with timer("rollout sleep"):
             # vLLM offload when vllm_enable_sleep
             if self.strategy.args.vllm_enable_sleep:
@@ -335,17 +335,18 @@ class SamplesGenerator:
         # Distribute requests to engines and collect responses
         refs = []
         batch_size = (len(all_prompt_token_ids) + len(llms) - 1) // len(llms)
-        for i, llm in enumerate(llms):
-            prompt_token_ids = all_prompt_token_ids[i * batch_size : (i + 1) * batch_size]
-            refs.append(llm.add_requests.remote(sampling_params=sampling_params, prompt_token_ids=prompt_token_ids))
-        ray.get(refs)
-
+        
         with timer("rollout"):
-            # Retrieve and combine results from all outputs
-            all_output_refs = []
             for i, llm in enumerate(llms):
-                all_output_refs.append(llm.get_responses.remote())
-            all_outputs = sum(ray.get(all_output_refs), [])
+                prompt_token_ids = all_prompt_token_ids[i * batch_size : (i + 1) * batch_size]
+                refs.append(llm.add_requests.remote(sampling_params=sampling_params, prompt_token_ids=prompt_token_ids))
+            ray.get(refs)
+
+        # Retrieve and combine results from all outputs
+        all_output_refs = []
+        for i, llm in enumerate(llms):
+            all_output_refs.append(llm.get_responses.remote())
+        all_outputs = sum(ray.get(all_output_refs), [])
 
         # Process outputs into Experience objects
         samples_list = []
