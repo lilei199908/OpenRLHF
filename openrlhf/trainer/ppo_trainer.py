@@ -16,7 +16,7 @@ from openrlhf.trainer.ray.launcher import RayActorGroup
 from openrlhf.utils.deepspeed import DeepspeedStrategy
 from openrlhf.utils.logging_utils import init_logger
 from openrlhf.utils.utils import get_tokenizer
-
+from openrlhf.utils.time import timer, log_perf_data
 logger = init_logger(__name__)
 
 
@@ -136,16 +136,17 @@ class BasePPOTrainer(ABC):
         if global_steps > self.freezing_actor_steps:
             if self.strategy.args.deepspeed_enable_sleep:
                 ray.get(self.actor_model_group.async_run_method(method_name="reload_states"))
-
-            actor_status_ref = self.actor_model_group.async_run_method(method_name="fit", kl_ctl=self.kl_ctl.value)
-            status.update(ray.get(actor_status_ref)[0])
+            with timer("train"):
+                actor_status_ref = self.actor_model_group.async_run_method(method_name="fit", kl_ctl=self.kl_ctl.value)
+                status.update(ray.get(actor_status_ref)[0])
 
             if self.strategy.args.deepspeed_enable_sleep:
                 ray.get(self.actor_model_group.async_run_method(method_name="offload_states"))
 
             # 4. broadcast weights to vllm engines
             if self.vllm_engines is not None:
-                self._broadcast_to_vllm()
+                with timer("update weights"):
+                    self._broadcast_to_vllm()
 
         # 5. wait remote critic model training done
         if self.critic_model_group and not self.strategy.args.colocate_all_models:
@@ -465,9 +466,10 @@ class PPOTrainer(BasePPOTrainer):
             number_of_samples = 0
             for _, rand_prompts, labels in self.prompts_dataloader:
                 remote_reward_model = self.remote_reward_model if self.args.dynamic_filtering else None
-                rollout_samples = self.samples_generator.generate_samples(
-                    rand_prompts, labels, remote_reward_model=remote_reward_model, **self.generate_kwargs
-                )
+                with timer("rollout and reward"):
+                    rollout_samples = self.samples_generator.generate_samples(
+                        rand_prompts, labels, remote_reward_model=remote_reward_model, **self.generate_kwargs
+                    )
                 pbar.update()
 
                 # dynamic filtering
@@ -519,8 +521,8 @@ class PPOTrainer(BasePPOTrainer):
                         self.critic_model_group.async_run_method_batch(method_name="append", experience=experiences)
                     )
                 ray.get(refs)
-
-                status = self.ppo_train(steps)
+                with timer("train and update weights"):
+                    status = self.ppo_train(steps)
 
                 if "kl" in status:
                     self.kl_ctl.update(status["kl"], args.rollout_batch_size * args.n_samples_per_prompt)
@@ -538,7 +540,7 @@ class PPOTrainer(BasePPOTrainer):
                     "data_loader_state_dict": self.prompts_dataloader.state_dict(),
                 }
                 self.save_logs_and_checkpoints(args, steps, pbar, status, client_states)
-
+                log_perf_data(steps)
                 steps = steps + 1
 
         if self._wandb is not None:

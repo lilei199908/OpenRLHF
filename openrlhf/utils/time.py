@@ -72,3 +72,9 @@ def timer(name_or_func):
             return func(*args, **kwargs)
 
     return wrapper
+
+def log_perf_data(rollout_id, args):
+    timer_instance = Timer()
+    log_dict = {f"perf/{key}_time": val for key, val in timer_instance.log_dict().items()}
+    print(f"perf {rollout_id}: {log_dict}")
+    timer_instance.reset()
