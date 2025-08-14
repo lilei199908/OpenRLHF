@@ -263,14 +263,15 @@ class SamplesGenerator:
         # vLLM wakeup when vllm_enable_sleep
         if self.strategy.args.vllm_enable_sleep:
             from openrlhf.trainer.ray.vllm_engine import batch_vllm_engine_call
-
-            batch_vllm_engine_call(self.vllm_engines, "wake_up")
+            with timer("rollout wake_up"):
+                batch_vllm_engine_call(self.vllm_engines, "wake_up")
 
         rollout_samples = self._generate_vllm(all_prompts, all_labels, **generate_kwargs)
-
-        # vLLM offload when vllm_enable_sleep
-        if self.strategy.args.vllm_enable_sleep:
-            batch_vllm_engine_call(self.vllm_engines, "sleep")
+        
+        with timer("rollout sleep"):
+            # vLLM offload when vllm_enable_sleep
+            if self.strategy.args.vllm_enable_sleep:
+                batch_vllm_engine_call(self.vllm_engines, "sleep")
 
         return rollout_samples
 

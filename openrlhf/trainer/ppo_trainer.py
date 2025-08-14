@@ -145,7 +145,6 @@ class BasePPOTrainer(ABC):
 
             # 4. broadcast weights to vllm engines
             if self.vllm_engines is not None:
-                with timer("update weights"):
                     self._broadcast_to_vllm()
 
         # 5. wait remote critic model training done
@@ -159,8 +158,9 @@ class BasePPOTrainer(ABC):
             from openrlhf.trainer.ray.vllm_engine import batch_vllm_engine_call
 
             batch_vllm_engine_call(self.vllm_engines, "wake_up")
-
-        ray.get(self.actor_model_group.async_run_method(method_name="broadcast_to_vllm"))
+            
+        with timer("update weights"):
+            ray.get(self.actor_model_group.async_run_method(method_name="broadcast_to_vllm"))
 
         if self.strategy.args.vllm_enable_sleep:
             batch_vllm_engine_call(self.vllm_engines, "sleep")
