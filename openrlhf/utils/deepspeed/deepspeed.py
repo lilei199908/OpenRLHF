@@ -271,7 +271,7 @@ class DeepspeedStrategy(ABC):
         else:
             ds_config["train_micro_batch_size_per_gpu"] = self.micro_train_batch_size
             ds_config["train_batch_size"] = self.train_batch_size * self.ring_attn_size * self.ds_tensor_parallel_size
-            ds_config["gradient_accumulation_steps"] = 1
+            ds_config["gradient_accumulation_steps"] = 3
         return ds_config
 
     def _ds_init_eval_model(self, model):
