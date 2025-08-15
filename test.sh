@@ -2,13 +2,13 @@ set -x
 ROOT_PATH='/data1/lilei'
 NODES_NUM=2
 python3 -m openrlhf.cli.train_ppo_ray \
-   --ref_num_nodes $NODES_NUM \
+   --ref_num_nodes 2 \
    --ref_num_gpus_per_node 8 \
-   --reward_num_nodes $NODES_NUM \
+   --reward_num_nodes 2 \
    --reward_num_gpus_per_node 8 \
-   --actor_num_nodes $NODES_NUM \
+   --actor_num_nodes 2 \
    --actor_num_gpus_per_node 8 \
-   --vllm_num_engines $NODES_NUM \
+   --vllm_num_engines 2 \
    --vllm_tensor_parallel_size 8 \
    --colocate_all_models \
    --vllm_gpu_memory_utilization 0.6 \
