@@ -20,11 +20,11 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --remote_rm_url /data1/lilei/OpenRLHF/examples/python/reward_func_aime2024.py \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
-   --micro_train_batch_size 10 \
-   --train_batch_size 80 \
-   --micro_rollout_batch_size 10 \
-   --rollout_batch_size 16 \
-   --n_samples_per_prompt 5 \
+   --micro_train_batch_size 15 \
+   --train_batch_size 120 \
+   --micro_rollout_batch_size 30 \
+   --rollout_batch_size 30 \
+   --n_samples_per_prompt 4 \
    --max_epochs 1 \
    --prompt_max_len 1024 \
    --max_samples 100000 \
@@ -43,7 +43,8 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --vllm_sync_backend nccl \
    --enforce_eager \
    --vllm_enable_sleep \
-   --deepspeed_enable_sleep
+   --deepspeed_enable_sleep \
+   --temperature 0.0001 
 
 # You could also try
 #   --kl_estimator k2 \
