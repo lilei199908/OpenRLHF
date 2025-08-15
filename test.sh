@@ -20,7 +20,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --remote_rm_url /data1/lilei/OpenRLHF/examples/python/reward_func_aime2024.py \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
-   --micro_train_batch_size 15 \
+   --micro_train_batch_size 5 \
    --train_batch_size 120 \
    --micro_rollout_batch_size 15 \
    --rollout_batch_size 30 \
