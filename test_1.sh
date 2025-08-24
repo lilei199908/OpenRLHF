@@ -16,13 +16,13 @@ RUNTIME_ENV_JSON="{
 # ray job submit --address="http://10.249.32.139:8265" \
 #    --runtime-env-json="${RUNTIME_ENV_JSON}" \
 python3 -m openrlhf.cli.train_ppo_ray \
-   --ref_num_nodes 2 \
+   --ref_num_nodes 1 \
    --ref_num_gpus_per_node 8 \
-   --reward_num_nodes 2 \
+   --reward_num_nodes 1 \
    --reward_num_gpus_per_node 8 \
-   --actor_num_nodes 2 \
+   --actor_num_nodes 1 \
    --actor_num_gpus_per_node 8 \
-   --vllm_num_engines 2 \
+   --vllm_num_engines 1 \
    --vllm_tensor_parallel_size 8 \
    --colocate_all_models \
    --vllm_gpu_memory_utilization 0.6 \
