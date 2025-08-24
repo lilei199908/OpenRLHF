@@ -20,7 +20,7 @@ python3 -m openrlhf.cli.train_ppo_ray \
    --ref_num_gpus_per_node 8 \
    --reward_num_nodes 2 \
    --reward_num_gpus_per_node 8 \
-   --actor_num_nodes 2 \
+   --actor_num_nodes 1 \
    --actor_num_gpus_per_node 8 \
    --vllm_num_engines 2 \
    --vllm_tensor_parallel_size 8 \
