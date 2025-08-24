@@ -18,7 +18,13 @@ from openrlhf.utils import get_strategy
 def train(args):
     # initialize ray if not initialized
     if not ray.is_initialized():
-        ray.init(runtime_env={"env_vars": {"TOKENIZERS_PARALLELISM": "true", "NCCL_DEBUG": "WARN"}})
+        ray.init(address="10.249.32.139:6379", runtime_env={"env_vars": {"TOKENIZERS_PARALLELISM": "true", "NCCL_DEBUG": "WARN",
+    "PYTHONPATH": "/root/Megatron-LM/",
+    "CUDA_DEVICE_MAX_CONNECTIONS": "1",
+    "NCCL_SOCKET_IFNAME": "bond0",
+    "NCCL_IB_HCA": "mlx5_0,mlx5_1,mlx5_4,mlx5_5",
+    "GLOO_SOCKET_IFNAME": "bond0"
+    }})
 
     # configure strategy
     strategy = get_strategy(args)
