@@ -271,7 +271,19 @@ class ActorPPOTrainer(ABC):
 
         if self.args.use_dynamic_batch:
             loss = loss * self.replay_buffer.dynamic_loss_scale[step]
+        if torch.cuda.is_available():
+            device = torch.cuda.current_device()
+            print(f"Device: {torch.cuda.get_device_name(device)}")
 
+            # 已分配的显存 (allocated): 当前 tensors 实际使用的显存
+            allocated = torch.cuda.memory_allocated(device) / 1024**3  # 转为 GB
+            # 已保留的显存 (reserved): 由缓存分配器保留的总显存（包含分配给缓存的部分）
+            reserved = torch.cuda.memory_reserved(device) / 1024**3     # 转为 GB
+
+            print(f"Allocated: {allocated:.2f} GB")
+            print(f"Reserved:  {reserved:.2f} GB")
+        else:
+            print("CUDA is not available.")
         self.strategy.backward(loss, self.actor, self.actor_optim)
         if self.args.use_dynamic_batch:
             if self.replay_buffer.dynamic_optimizer_step[step]:
