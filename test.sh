@@ -37,7 +37,7 @@ ray job submit --address="http://10.249.32.139:8266" \
    --save_hf_ckpt \
    --micro_train_batch_size 3 \
    --use_dynamic_batch \
-   --packing_samples \ 
+   --packing_samples \
    --train_batch_size 240 \
    --micro_rollout_batch_size 15 \
    --rollout_batch_size 30 \
