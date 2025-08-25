@@ -35,7 +35,7 @@ ray job submit --address="http://10.249.32.139:8266" \
    --remote_rm_url /data1/lilei/OpenRLHF/examples/python/reward_func_aime2024.py \
    --ckpt_path $ROOT_PATH/test_scripts/ckpt/Qwen3-4B \
    --save_hf_ckpt \
-   --micro_train_batch_size 15 \
+   --micro_train_batch_size 3 \
    --train_batch_size 240 \
    --micro_rollout_batch_size 15 \
    --rollout_batch_size 30 \
